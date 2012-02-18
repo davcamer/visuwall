@@ -38,6 +38,7 @@ import net.awired.clients.teamcity.resource.TeamCityBuildType;
 import net.awired.clients.teamcity.resource.TeamCityBuilds;
 import net.awired.clients.teamcity.resource.TeamCityChange;
 import net.awired.clients.teamcity.resource.TeamCityProject;
+import net.awired.clients.teamcity.resource.TeamCityUser;
 import net.awired.visuwall.api.domain.BuildState;
 import net.awired.visuwall.api.domain.BuildTime;
 import net.awired.visuwall.api.domain.Commiter;
@@ -131,11 +132,20 @@ public class TeamCityConnectionTest {
         changes.add(change);
 
         when(teamCity.findChanges(anyInt())).thenReturn(changes);
+        
+        TeamCityUser user = new TeamCityUser();
+        user.setUsername("npryce");
+        user.setEmail("npryce@mailinator.com");
+        user.setName("Nat Pryce");
+        
+        when(teamCity.findUserByUsername("npryce")).thenReturn(user);
 
         SoftwareProjectId softwareProjectId = new SoftwareProjectId("projectId");
         List<Commiter> commiters = teamCityConnection.getBuildCommiters(softwareProjectId, "1");
         Commiter commiter = commiters.get(0);
-        assertEquals("npryce", commiter.getName());
+        assertEquals("npryce", commiter.getId());
+        assertEquals("npryce@mailinator.com", commiter.getEmail());
+        assertEquals("Nat Pryce", commiter.getName());
     }
 
     @Test

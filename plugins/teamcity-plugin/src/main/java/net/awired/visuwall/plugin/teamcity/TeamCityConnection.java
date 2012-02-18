@@ -36,6 +36,7 @@ import net.awired.clients.teamcity.exception.TeamCityBuildTypeNotFoundException;
 import net.awired.clients.teamcity.exception.TeamCityChangesNotFoundException;
 import net.awired.clients.teamcity.exception.TeamCityProjectNotFoundException;
 import net.awired.clients.teamcity.exception.TeamCityProjectsNotFoundException;
+import net.awired.clients.teamcity.exception.TeamCityUserNotFoundException;
 import net.awired.clients.teamcity.resource.TeamCityAbstractBuild;
 import net.awired.clients.teamcity.resource.TeamCityBuild;
 import net.awired.clients.teamcity.resource.TeamCityBuildItem;
@@ -43,6 +44,7 @@ import net.awired.clients.teamcity.resource.TeamCityBuildType;
 import net.awired.clients.teamcity.resource.TeamCityBuilds;
 import net.awired.clients.teamcity.resource.TeamCityChange;
 import net.awired.clients.teamcity.resource.TeamCityProject;
+import net.awired.clients.teamcity.resource.TeamCityUser;
 import net.awired.visuwall.api.domain.BuildState;
 import net.awired.visuwall.api.domain.BuildTime;
 import net.awired.visuwall.api.domain.Commiter;
@@ -321,9 +323,24 @@ public class TeamCityConnection implements BuildCapability, TestCapability, View
             List<TeamCityChange> changes = teamCity.findChanges(Integer.valueOf(buildId));
             for (TeamCityChange change : changes) {
                 String username = change.getUsername();
+                LOG.info("username: " + username);
                 Commiter commiter = new Commiter(username);
-                commiter.setName(username);
+                
+                try {
+                    TeamCityUser user = teamCity.findUserByUsername(username);
+                    LOG.info("retrieved user: " + user.toString());
+                    commiter.setName(user.getName());
+                    commiter.setEmail(user.getEmail());
+                } catch (TeamCityUserNotFoundException e) {
+                    LOG.info("user not found: " + username);
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(e.getMessage());
+                    }
+                }
+                
+                LOG.info("commiter: " + commiter.toString());
                 if (!commiters.contains(commiter)) {
+                    LOG.info("adding commiter");
                     commiters.add(commiter);
                 }
             }
