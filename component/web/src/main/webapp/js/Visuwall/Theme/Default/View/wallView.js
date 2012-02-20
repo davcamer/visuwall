@@ -202,8 +202,19 @@ define(['jquery', //
 				var commiterString = '';
 				for ( var i = 0; i < commiters.length; i++) {
 					var commiter = commiters[i];
+                    var gravatarId;
+                    if (commiter.email != null && commiter.email != "") {
+                        gravatarId = commiter.email;
+                    } else if (commiter.username != null && commiter.username != "") {
+                        // username as a fallback should give us unique 8-bit faces
+                        // even for people without their TeamCity and Git accounts
+                        // hooked up.
+                        gravatarId = commiter.username;
+                    } else {
+                        gravatarId = "";
+                    }
 					commiterString += '<li><img src="'
-							+ get_gravatar(commiter.email == null ? "" : commiter.email, 250)
+							+ get_gravatar(commiter.email == null ? "" : commiter.email, 150)
 							+ '" style="height:100%" /></li>';
 				}
 				$this._getElement(projectId, 'ul.commiters').html($(commiterString))
