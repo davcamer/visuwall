@@ -322,22 +322,25 @@ public class TeamCityConnection implements BuildCapability, TestCapability, View
         try {
             List<TeamCityChange> changes = teamCity.findChanges(Integer.valueOf(buildId));
             for (TeamCityChange change : changes) {
-                String username = change.getUsername();
-                LOG.info("username: " + username);
-                Commiter commiter = new Commiter(username);
-                
-                try {
-                    TeamCityUser user = teamCity.findUserByUsername(username);
-                    LOG.info("retrieved user: " + user.toString());
-                    commiter.setName(user.getName());
-                    commiter.setEmail(user.getEmail());
-                } catch (TeamCityUserNotFoundException e) {
-                    LOG.info("user not found: " + username);
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e.getMessage());
+                Commiter commiter = new Commiter(change.getUsername());
+                if (change.getUser() != null) {
+                    String userId = change.getUser().getId();
+                    try {
+                        TeamCityUser user = teamCity.findUser(userId);
+                        LOG.info("retrieved user: " + user.toString());
+                        commiter = new Commiter(user.getUsername());
+                        commiter.setName(user.getName());
+                        commiter.setEmail(user.getEmail());
+                    } catch (TeamCityUserNotFoundException e) {
+                        LOG.info("user not found for id: " + userId);
+                        LOG.info(e.toString());
+                        e.printStackTrace();
+////                        if (LOG.isDebugEnabled()) {
+//                            LOG.info(e.getMessage());
+////                        }
                     }
                 }
-                
+
                 LOG.info("commiter: " + commiter.toString());
                 if (!commiters.contains(commiter)) {
                     LOG.info("adding commiter");

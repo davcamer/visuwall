@@ -32,13 +32,7 @@ import net.awired.clients.teamcity.TeamCity;
 import net.awired.clients.teamcity.exception.TeamCityBuildNotFoundException;
 import net.awired.clients.teamcity.exception.TeamCityBuildTypeNotFoundException;
 import net.awired.clients.teamcity.exception.TeamCityProjectsNotFoundException;
-import net.awired.clients.teamcity.resource.TeamCityBuild;
-import net.awired.clients.teamcity.resource.TeamCityBuildItem;
-import net.awired.clients.teamcity.resource.TeamCityBuildType;
-import net.awired.clients.teamcity.resource.TeamCityBuilds;
-import net.awired.clients.teamcity.resource.TeamCityChange;
-import net.awired.clients.teamcity.resource.TeamCityProject;
-import net.awired.clients.teamcity.resource.TeamCityUser;
+import net.awired.clients.teamcity.resource.*;
 import net.awired.visuwall.api.domain.BuildState;
 import net.awired.visuwall.api.domain.BuildTime;
 import net.awired.visuwall.api.domain.Commiter;
@@ -126,7 +120,9 @@ public class TeamCityConnectionTest {
     @Test
     public void should_get_commiters() throws Exception {
         TeamCityChange change = new TeamCityChange();
-        change.setUsername("npryce");
+        TeamCityChangeUser changeUser = new TeamCityChangeUser();
+        changeUser.setId("n/a");
+        change.setUser(changeUser);
 
         List<TeamCityChange> changes = new ArrayList<TeamCityChange>();
         changes.add(change);
@@ -138,7 +134,7 @@ public class TeamCityConnectionTest {
         user.setEmail("npryce@mailinator.com");
         user.setName("Nat Pryce");
         
-        when(teamCity.findUserByUsername("npryce")).thenReturn(user);
+        when(teamCity.findUser(anyString())).thenReturn(user);
 
         SoftwareProjectId softwareProjectId = new SoftwareProjectId("projectId");
         List<Commiter> commiters = teamCityConnection.getBuildCommiters(softwareProjectId, "1");
